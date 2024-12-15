@@ -101,7 +101,7 @@ def main():
     st.title("Wastewater Treatment, IETS    Report+ Analysis ")
 
     # File uploader
-    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    uploaded_file = st.file_uploader("Upload  CSV file", type="csv")
     
     if uploaded_file is not None:
         # Analyze the CSV file
