@@ -98,7 +98,7 @@ def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dat
     return report_text
 
 def main():
-    st.title("Wastewater Treatment Data Analysis")
+    st.title("Wastewater Treatment, IETS :  Report+ Analysis ")
 
     # File uploader
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
