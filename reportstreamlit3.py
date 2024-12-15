@@ -98,7 +98,7 @@ def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dat
     return report_text
 
 def main():
-    st.title("Wastewater Treatment, IETS    Report+ Analysis ")
+    st.title("Wastewater Treatment, IETS    Report + Analysis © ")
 
     # File uploader
     uploaded_file = st.file_uploader("Upload  CSV file", type="csv")
@@ -136,7 +136,7 @@ def main():
         st.download_button(
             label="Download Report as .docx",
             data=docx_file,
-            file_name="wastewater_treatment_report.docx",
+            file_name="IETS_report.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
