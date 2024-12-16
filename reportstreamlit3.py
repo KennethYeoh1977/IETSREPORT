@@ -14,7 +14,8 @@ def analyze_csv(file_name):
         'pH': 'pH F/D',
         'COD': 'COD F/D',
         'SS': 'SS F/D',
-        'Zn': 'Zn F/D'
+        'Zn': 'Zn F/D',
+        'BOD': 'BOD F/D'
     }, inplace=True)
     
     # Convert 'Date' column to datetime
@@ -25,19 +26,22 @@ def analyze_csv(file_name):
     avg_cod = df['COD F/D'].mean()
     avg_ss = df['SS F/D'].mean()
     avg_zn = df['Zn F/D'].mean()
+    avg_bod = df['BOD F/D'].mean()
     
     # Identify non-compliance dates
     non_compliance_dates = []
     for index, row in df.iterrows():
         exceeded_params = []
-        if row['COD F/D'] > 100:
+        if row['COD F/D'] > 200:
             exceeded_params.append(f"COD F/D: {row['COD F/D']}")
-        if row['SS F/D'] > 100:
+        if row['SS F/D'] > 50:
             exceeded_params.append(f"SS F/D: {row['SS F/D']}")
-        if row['Zn F/D'] > 1.0:
+        if row['Zn F/D'] > 2.0:
             exceeded_params.append(f"Zn F/D: {row['Zn F/D']}")
         if not (5.5 <= row['pH F/D'] <= 9.0):
             exceeded_params.append(f"pH F/D: {row['pH F/D']}")
+        if row['BOD F/D'] > 20:  # Assuming Standard A limit for BOD
+            exceeded_params.append(f"BOD F/D: {row['BOD F/D']}")
         
         if exceeded_params:
             non_compliance_dates.append({
@@ -51,9 +55,9 @@ def analyze_csv(file_name):
     passing_percentage = (passing_days / total_days) * 100
     failing_percentage = 100 - passing_percentage
     
-    return df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dates, passing_percentage, failing_percentage
+    return df, avg_ph, avg_cod, avg_ss, avg_zn, avg_bod, non_compliance_dates, passing_percentage, failing_percentage
 
-def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dates, passing_percentage, failing_percentage):
+def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, avg_bod, non_compliance_dates, passing_percentage, failing_percentage):
     report_text = f"**IETS BIG Data Analysis Report USING A.I ANALYTICS:**\n\n"
     report_text += f"**Report Date and Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
     report_text += f"**Reference Number:** [Insert Reference Number]\n"
@@ -68,13 +72,14 @@ def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dat
     report_text += "### 2. Data Analytics:\n"
     report_text += f"- The data covers various dates from {df['Date'].min().strftime('%Y-%m-%d')} to {df['Date'].max().strftime('%Y-%m-%d')}.\n"
     report_text += "- The data is collected from the monitoring systems of the facility.\n"
-    report_text += "- The purpose of this report is to provide insights into the behavior of key parameters (pH F/D, COD F/D, SS F/D, Zn F/D), identify dates of non-compliance with discharge standards, and offer recommendations for improvement.\n\n"
+    report_text += "- The purpose of this report is to provide insights into the behavior of key parameters (pH F/D, COD F/D, SS F/D, Zn F/D, BOD F/D), identify dates of non-compliance with discharge standards, and offer recommendations for improvement.\n\n"
     
     report_text += "### Average Behavior:\n"
     report_text += f"- **Average pH F/D:** {avg_ph:.2f}\n"
     report_text += f"- **Average COD F/D:** {avg_cod:.2f}\n"
     report_text += f"- **Average SS F/D:** {avg_ss:.2f}\n"
-    report_text += f"- **Average Zn F/D:** {avg_zn:.2f}\n\n"
+    report_text += f"- **Average Zn F/D:** {avg_zn:.2f}\n"
+    report_text += f"- **Average BOD F/D:** {avg_bod:.2f}\n\n"
     
     report_text += "### Non-Compliance Dates and Reasons:\n"
     for entry in non_compliance_dates:
@@ -90,25 +95,46 @@ def generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dat
     
     report_text += "### Recommendations:\n"
     report_text += "1. **Regularly calibrate sensors** to ensure accurate readings.\n"
-    report_text += "2. **Investigate and address the causes** of high COD and SS levels on specific dates.\n"
+    report_text += "2. **Investigate and address the causes** of high COD, SS, and BOD levels on specific dates.\n"
     report_text += "3. **Implement a maintenance schedule** to prevent equipment malfunctions.\n"
     report_text += "4. **Ensure proper chemical dosing** to maintain optimal pH levels.\n"
     report_text += "5. **Review and adjust operational procedures** to prevent future non-compliance.\n\n"
+    report_text += "6. **Maintenance work on scheduled** to prevent future breakdowns/non-compliance.\n\n"
     
+    report_text += "###  Parameter - pH:\n"
+    report_text += "- **Discharge Limit for Standard A:** 6.0-9.0 mg/L\n"
+    report_text += "- **Discharge Limit for Standard B:** 5.5-9.0 mg/L\n\n"
+    
+    report_text += "###  Parameter - BOD:\n"
+    report_text += "- **Discharge Limit for Standard A:** 20 mg/L\n"
+    report_text += "- **Discharge Limit for Standard B:** 50 mg/L\n\n"
+    
+    report_text += "###  Parameter - COD:\n"
+    report_text += "- **Discharge Limit for Standard A:** 80 mg/L\n"
+    report_text += "- **Discharge Limit for Standard B:** 200 mg/L\n\n"
+    
+    report_text += "###  Parameter - Suspended solids:\n"
+    report_text += "- **Discharge Limit for Standard A:** 50 mg/L\n"
+    report_text += "- **Discharge Limit for Standard B:** 100 mg/L\n\n"
+    
+    report_text += "###  Parameter - Zn:\n"
+    report_text += "- **Discharge Limit for Standard A:** 2.0 mg/L\n"
+    report_text += "- **Discharge Limit for Standard B:** 2.0 mg/L\n\n"
+
     return report_text
 
 def main():
-    st.title("Wastewater Treatment, IETS     Report + Analysis © ")
+    st.title("Wastewater Treatment, IETS Report + Analysis ©")
 
     # File uploader
-    uploaded_file = st.file_uploader("Upload  CSV file", type="csv")
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
     if uploaded_file is not None:
         # Analyze the CSV file
-        df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dates, passing_percentage, failing_percentage = analyze_csv(uploaded_file)
+        df, avg_ph, avg_cod, avg_ss, avg_zn, avg_bod, non_compliance_dates, passing_percentage, failing_percentage = analyze_csv(uploaded_file)
 
         # Generate report text
-        report_text = generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, non_compliance_dates, passing_percentage, failing_percentage)
+        report_text = generate_report_text(df, avg_ph, avg_cod, avg_ss, avg_zn, avg_bod, non_compliance_dates, passing_percentage, failing_percentage)
 
         # Display report
         st.write(report_text)
@@ -120,6 +146,7 @@ def main():
         ax.plot(df['Date'], df['COD F/D'], label='COD F/D')
         ax.plot(df['Date'], df['SS F/D'], label='SS F/D')
         ax.plot(df['Date'], df['Zn F/D'], label='Zn F/D')
+        ax.plot(df['Date'], df['BOD F/D'], label='BOD F/D')
         ax.set_xlabel('Date')
         ax.set_ylabel('Value')
         ax.set_title('Trends of Key Parameters Over Time')
@@ -136,9 +163,10 @@ def main():
         st.download_button(
             label="Download Report as .docx",
             data=docx_file,
-            file_name="IETS_report.docx",
+            file_name="wastewater_treatment_report.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
 if __name__ == "__main__":
     main()
+
